@@ -185,7 +185,7 @@ class SettingsToggleScreen extends StatelessWidget {
     return Settings().onBoolChanged(
       settingKey: settingKey,
       defaultValue: defaultValue,
-      childBuilder: (BuildContext context, bool value) {
+      childBuilder: (BuildContext context, bool? value) {
         return _ConfirmableScreen(
           child: SettingsScreen(
             title: title,
@@ -202,12 +202,11 @@ class SettingsToggleScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildChildren(bool value, List<Widget> children) {
+  List<Widget> _buildChildren(bool? value, List<Widget> children) {
     List<Widget> elements = [
       SwitchSettingsTile(
         settingKey: settingKey,
-        title:
-            value == false ? subtitleIfOff : subtitle,
+        title: value == false ? subtitleIfOff : subtitle,
         defaultValue: defaultValue,
         confirmText: confirmText,
         confirmTextToEnable: confirmTextToEnable,
@@ -276,10 +275,10 @@ class SettingsTileGroup extends StatelessWidget {
       return _buildChild(context);
     }
     return Settings().onBoolChanged(
-      settingKey: visibleIfKey,
+      settingKey: visibleIfKey!,
       defaultValue: visibleByDefault,
-      childBuilder: (BuildContext context, bool visible) {
-        return visible ? _buildChild(context) : Container();
+      childBuilder: (BuildContext context, bool? visible) {
+        return visible == true ? _buildChild(context) : Container();
       },
     );
   }
@@ -369,18 +368,18 @@ class __SettingsTileState extends State<_SettingsTile>
   @override
   Widget build(BuildContext context) {
     if (widget.visibleIfKey == null) {
-      return _wrapEnableable(context)!;
+      return _wrapEnableable(context);
     }
     return Settings().onBoolChanged(
-      settingKey: widget.visibleIfKey,
+      settingKey: widget.visibleIfKey!,
       defaultValue: widget.visibleByDefault,
-      childBuilder: (BuildContext context, bool visible) {
-        return visible ? _wrapEnableable(context) : Container();
+      childBuilder: (BuildContext context, bool? visible) {
+        return visible == true ? _wrapEnableable(context) : Container();
       },
     );
   }
 
-  Widget? _wrapEnableable(BuildContext context) {
+  Widget _wrapEnableable(BuildContext context) {
     return wrapEnableable(
       context: context,
       enabledIfKey: widget.enabledIfKey,
@@ -502,10 +501,10 @@ class ExpansionSettingsTile extends StatelessWidget {
       return _buildChild(context);
     }
     return Settings().onBoolChanged(
-      settingKey: visibleIfKey,
+      settingKey: visibleIfKey!,
       defaultValue: visibleByDefault,
-      childBuilder: (BuildContext context, bool visible) {
-        return visible ? _buildChild(context) : Container();
+      childBuilder: (BuildContext context, bool? visible) {
+        return visible == true ? _buildChild(context) : Container();
       },
     );
   }
@@ -762,7 +761,7 @@ class _CheckboxSettingsTileState extends State<CheckboxSettingsTile>
         return Settings().onBoolChanged(
           settingKey: widget.settingKey,
           defaultValue: widget.defaultValue,
-          childBuilder: (BuildContext context, bool value) {
+          childBuilder: (BuildContext context, bool? value) {
             return _SettingsTile(
               title: widget.title,
               subtitle: value == true || widget.subtitleIfOff == null
@@ -967,7 +966,7 @@ class _SwitchSettingsTileState extends State<SwitchSettingsTile>
         return Settings().onBoolChanged(
           settingKey: widget.settingKey,
           defaultValue: widget.defaultValue,
-          childBuilder: (BuildContext context, bool value) {
+          childBuilder: (BuildContext context, bool? value) {
             return _SettingsTile(
               title: widget.title,
               subtitle: value == true || widget.subtitleIfOff == null
@@ -1142,12 +1141,11 @@ class _RadioSettingsTileState extends State<RadioSettingsTile>
         return Settings().onStringChanged(
           settingKey: widget.settingKey,
           defaultValue: selectedKey,
-          childBuilder: (BuildContext context, String value) {
+          childBuilder: (BuildContext context, String? value) {
             _change(value);
             List<Widget> elements = <Widget>[];
             elements.add(_buildTile(value, enabled));
-            if (widget.values.isNotEmpty &&
-                !widget.expandable) {
+            if (widget.values.isNotEmpty && !widget.expandable) {
               elements.addAll(_buildChildren(value, enabled));
             }
             return Column(children: elements);
@@ -1157,7 +1155,7 @@ class _RadioSettingsTileState extends State<RadioSettingsTile>
     );
   }
 
-  Widget _buildTile(String groupValue, bool enabled) {
+  Widget _buildTile(String? groupValue, bool enabled) {
     String? subtitle = selectedTitle != null
         ? widget.subtitle ?? selectedTitle
         : widget.subtitleIfOff;
@@ -1180,7 +1178,7 @@ class _RadioSettingsTileState extends State<RadioSettingsTile>
           );
   }
 
-  List<Widget> _buildChildren(String groupValue, bool enabled) {
+  List<Widget> _buildChildren(String? groupValue, bool enabled) {
     List<Widget> elements = <Widget>[];
     widget.values.forEach((optionKey, optionName) {
       elements.add(_SimpleRadioSettingsTile(
@@ -1224,7 +1222,7 @@ class _RadioSettingsTileState extends State<RadioSettingsTile>
 class _SimpleRadioSettingsTile extends StatelessWidget {
   final String? title;
   final String value;
-  final String groupValue;
+  final String? groupValue;
   final ValueChanged<String?> onChanged;
   final bool enabled;
 
@@ -1377,7 +1375,7 @@ class _SliderSettingsTileState extends State<SliderSettingsTile>
         return Settings().onDoubleChanged(
           settingKey: widget.settingKey,
           defaultValue: value,
-          childBuilder: (BuildContext context, double value) {
+          childBuilder: (BuildContext context, double? value) {
             return _SettingsTile(
               title: widget.title,
               subtitle: widget.subtitle,
@@ -1385,7 +1383,7 @@ class _SliderSettingsTileState extends State<SliderSettingsTile>
               visibleIfKey: widget.visibleIfKey,
               visibleByDefault: widget.visibleByDefault,
               child: _SettingsSlider(
-                value: value,
+                value: value ?? widget.minValue,
                 min: widget.minValue,
                 max: widget.maxValue,
                 step: widget.step,
@@ -1440,8 +1438,8 @@ class _ModalSettingsTile extends StatefulWidget {
   final String? visibleIfKey;
   final String? enabledIfKey;
   final bool visibleByDefault;
-  final Function valueToTitle;
-  final Function buildChild;
+  final String? Function(String) valueToTitle;
+  final Widget? Function(String?, void Function(String?)) buildChild;
   final bool refreshStateOnChange;
   final ValueChanged<String>? onChanged;
   final String cancelCaption;
@@ -1508,7 +1506,7 @@ class __ModalSettingsTileState extends State<_ModalSettingsTile>
         return Settings().onStringChanged(
           settingKey: widget.settingKey,
           defaultValue: widget.defaultValue,
-          childBuilder: (BuildContext context, String value) {
+          childBuilder: (BuildContext context, String? value) {
             return _SettingsTile(
               title: widget.title,
               subtitle: _getSubtitle(value),
@@ -1529,8 +1527,8 @@ class __ModalSettingsTileState extends State<_ModalSettingsTile>
     );
   }
 
-  String? _getSubtitle(String value) {
-    return widget.valueToTitle(value) != null
+  String? _getSubtitle(String? value) {
+    return value != null && widget.valueToTitle(value) != null
         ? widget.subtitle ??
             (!widget.obfuscateSubtitle
                 ? widget.valueToTitle(value)
@@ -1540,7 +1538,7 @@ class __ModalSettingsTileState extends State<_ModalSettingsTile>
         : null;
   }
 
-  void _onChanged(String newValue) {
+  void _onChanged(String? newValue) {
     confirm(
       context: context,
       oldValue: value,
@@ -1562,7 +1560,7 @@ class __ModalSettingsTileState extends State<_ModalSettingsTile>
     );
   }
 
-  void _openModal(BuildContext context, String value) {
+  void _openModal(BuildContext context, String? value) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1582,9 +1580,9 @@ class __ModalSettingsTileState extends State<_ModalSettingsTile>
 
 class _SettingsModal extends StatefulWidget {
   final String title;
-  final Function buildChild;
-  final String initialValue;
-  final ValueChanged<String> onSelected;
+  final Widget? Function(String?, void Function(String?)) buildChild;
+  final String? initialValue;
+  final ValueChanged<String?> onSelected;
   final bool? refreshStateOnChange;
   final String cancelCaption;
   final String okCaption;
@@ -1604,7 +1602,7 @@ class _SettingsModal extends StatefulWidget {
 }
 
 class __SettingsModalState extends State<_SettingsModal> {
-  late String value;
+  String? value;
 
   @override
   void initState() {
@@ -1638,13 +1636,13 @@ class __SettingsModalState extends State<_SettingsModal> {
     );
   }
 
-  void _onChanged(String newValue) {
+  void _onChanged(String? newValue) {
     if (widget.refreshStateOnChange!) {
       setState(() {
-        _handleChange(newValue);
+        _handleChange(newValue!);
       });
     } else {
-      _handleChange(newValue);
+      _handleChange(newValue!);
     }
   }
 
@@ -1735,7 +1733,7 @@ class RadioPickerSettingsTile extends StatelessWidget {
       visibleIfKey: visibleIfKey,
       enabledIfKey: enabledIfKey,
       visibleByDefault: visibleByDefault,
-      buildChild: (String value, Function(String?) onChanged) {
+      buildChild: (String? value, void Function(String?) onChanged) {
         // TODO: Scroll to the selected value.
         return Container(
           width: double.maxFinite,
@@ -1855,9 +1853,9 @@ class TextFieldModalSettingsTile extends StatelessWidget {
       visibleIfKey: visibleIfKey,
       enabledIfKey: enabledIfKey,
       visibleByDefault: visibleByDefault,
-      buildChild: (String value, Function onChanged) {
+      buildChild: (String? value, void Function(String?) onChanged) {
         TextEditingController _controller = TextEditingController();
-        _controller.text = value;
+        _controller.text = value ?? '';
         _controller.addListener(() {
           onChanged(_controller.text);
         });
@@ -1875,19 +1873,23 @@ class TextFieldModalSettingsTile extends StatelessWidget {
 }
 
 class _ColorWidget {
-  String _valueToTitle(String value) {
+  String _valueToTitle(String? value) {
     String color = "00000000";
-    try {
-      color = value.split('0x')[1].split(')')[0];
-    } catch (e) {}
+    if (value != null) {
+      try {
+        color = value.split('0x')[1].split(')')[0];
+      } catch (e) {}
+    }
     return "0x$color";
   }
 
-  Color _getColorByString(String value) {
+  Color _getColorByString(String? value) {
     Color color = Colors.black;
-    try {
-      color = Color(int.parse(value.split('0x')[1].split(')')[0], radix: 16));
-    } catch (e) {}
+    if (value != null) {
+      try {
+        color = Color(int.parse(value.split('0x')[1].split(')')[0], radix: 16));
+      } catch (e) {}
+    }
     return color;
   }
 }
@@ -1903,8 +1905,8 @@ class _ColorPickerSettingsTile extends StatelessWidget with _ColorWidget {
   final bool visibleByDefault;
   final String cancelCaption;
   final String okCaption;
-  final Function childBuilder;
-  final Function valueToTitle;
+  final Widget? Function(String?, void Function(String?)) childBuilder;
+  final String? Function(String) valueToTitle;
   final String? confirmText;
   final String? confirmModalTitle;
   final String? confirmModalCancelCaption;
@@ -1934,7 +1936,7 @@ class _ColorPickerSettingsTile extends StatelessWidget with _ColorWidget {
     return Settings().onStringChanged(
       settingKey: settingKey,
       defaultValue: defaultValue,
-      childBuilder: (BuildContext context, String value) {
+      childBuilder: (BuildContext context, String? value) {
         Widget leading = Container(
           width: 40.0,
           height: 40.0,
@@ -2061,7 +2063,7 @@ class SimpleColorPickerSettingsTile extends StatelessWidget with _ColorWidget {
     return Settings().onStringChanged(
       settingKey: settingKey,
       defaultValue: defaultValue,
-      childBuilder: (BuildContext context, String value) {
+      childBuilder: (BuildContext context, String? value) {
         return _ColorPickerSettingsTile(
           settingKey: settingKey,
           title: title,
@@ -2074,7 +2076,7 @@ class SimpleColorPickerSettingsTile extends StatelessWidget with _ColorWidget {
           cancelCaption: cancelCaption,
           okCaption: okCaption,
           valueToTitle: (String key) => _valueToTitle(key),
-          childBuilder: (String value, Function onChanged) {
+          childBuilder: (String? value, void Function(String?) onChanged) {
             return ColorPicker(
               pickerColor: _getColorByString(value),
               onColorChanged: (Color color) => onChanged(color.toString()),
@@ -2185,7 +2187,7 @@ class MaterialColorPickerSettingsTile extends StatelessWidget
     return Settings().onStringChanged(
       settingKey: settingKey,
       defaultValue: defaultValue,
-      childBuilder: (BuildContext context, String value) {
+      childBuilder: (BuildContext context, String? value) {
         return _ColorPickerSettingsTile(
           settingKey: settingKey,
           title: title,
@@ -2198,7 +2200,7 @@ class MaterialColorPickerSettingsTile extends StatelessWidget
           cancelCaption: cancelCaption,
           okCaption: okCaption,
           valueToTitle: (String key) => _valueToTitle(key),
-          childBuilder: (String value, Function onChanged) {
+          childBuilder: (String? value, void Function(String?) onChanged) {
             return BlockPicker(
               pickerColor: _getColorByString(_valueToTitle(value)),
               onColorChanged: (Color color) {
@@ -2267,10 +2269,10 @@ class SettingsContainer extends StatelessWidget {
       return _buildChild();
     }
     return Settings().onBoolChanged(
-      settingKey: visibleIfKey,
+      settingKey: visibleIfKey!,
       defaultValue: visibleByDefault,
-      childBuilder: (BuildContext context, bool visible) {
-        return visible ? _buildChild() : Container();
+      childBuilder: (BuildContext context, bool? visible) {
+        return visible == true ? _buildChild() : Container();
       },
     );
   }
@@ -2288,7 +2290,7 @@ class SettingsContainer extends StatelessWidget {
 }
 
 class _SettingsCheckbox extends StatelessWidget {
-  final bool value;
+  final bool? value;
   final ValueChanged<bool?> onChanged;
   final bool enabled;
 
@@ -2308,7 +2310,7 @@ class _SettingsCheckbox extends StatelessWidget {
 }
 
 class _SettingsSwitch extends StatelessWidget {
-  final bool value;
+  final bool? value;
   final ValueChanged<bool> onChanged;
   final bool enabled;
 
@@ -2321,14 +2323,14 @@ class _SettingsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Switch(
-      value: value,
+      value: value ?? false,
       onChanged: enabled ? onChanged : null,
     );
   }
 }
 
 class _SettingsRadio extends StatelessWidget {
-  final String groupValue;
+  final String? groupValue;
   final String value;
   final ValueChanged<String?> onChanged;
   final bool enabled;
@@ -2539,7 +2541,8 @@ class _Confirmable {
   }
 }
 
-typedef ChildBuilder = Widget Function(BuildContext context, bool visibleByDefault);
+typedef ChildBuilder = Widget Function(
+    BuildContext context, bool visibleByDefault);
 
 class _Enableable {
   Widget wrapEnableable({
@@ -2559,7 +2562,7 @@ class _Enableable {
     );
   }
 
-  StreamBuilder<bool> __onEnabledChanged({
+  StreamBuilder<bool?> __onEnabledChanged({
     required BuildContext context,
     required String enabledIfKey,
     required bool visibleByDefault,
@@ -2568,8 +2571,8 @@ class _Enableable {
     return Settings().onBoolChanged(
       settingKey: enabledIfKey,
       defaultValue: visibleByDefault,
-      childBuilder: (BuildContext context, bool enabled) {
-        return childBuilder(context, enabled);
+      childBuilder: (BuildContext context, bool? enabled) {
+        return childBuilder(context, enabled ?? visibleByDefault);
       },
     );
   }
