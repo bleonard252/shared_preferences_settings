@@ -328,6 +328,7 @@ class _SettingsTile extends StatefulWidget {
   final String? visibleIfKey;
   final String? enabledIfKey;
   final bool visibleByDefault;
+  final bool showDivider;
   final Function? onTap;
 
   _SettingsTile({
@@ -341,6 +342,7 @@ class _SettingsTile extends StatefulWidget {
     this.visibleIfKey,
     this.enabledIfKey,
     this.visibleByDefault = true,
+    this.showDivider = true,
     this.onTap,
   });
 
@@ -405,7 +407,7 @@ class __SettingsTileState extends State<_SettingsTile>
           trailing: widget.widget,
           enabled: enabled,
         ),
-        _SettingsTileDivider(),
+        if (widget.showDivider) _SettingsTileDivider(),
       ],
     );
   }
@@ -480,6 +482,7 @@ class __SettingsTileState extends State<_SettingsTile>
 /// );
 class ExpansionSettingsTile extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Icon? icon;
   final List<Widget> children;
   final String? visibleIfKey;
@@ -488,6 +491,7 @@ class ExpansionSettingsTile extends StatelessWidget {
 
   ExpansionSettingsTile({
     required this.title,
+    this.subtitle,
     this.icon,
     required this.children,
     this.initiallyExpanded = false,
@@ -510,11 +514,17 @@ class ExpansionSettingsTile extends StatelessWidget {
   }
 
   Widget _buildChild(BuildContext context) {
-    return ExpansionTile(
-      title: Text(title),
-      children: children,
-      leading: icon,
-      initiallyExpanded: initiallyExpanded,
+    return Column(
+      children: [
+        ExpansionTile(
+          title: Text(title),
+          subtitle: subtitle != null ? Text(subtitle!) : null,
+          children: children,
+          leading: icon,
+          initiallyExpanded: initiallyExpanded,
+        ),
+        _SettingsTileDivider()
+      ],
     );
   }
 }
@@ -1162,6 +1172,7 @@ class _RadioSettingsTileState extends State<RadioSettingsTile>
     return widget.expandable
         ? ExpansionSettingsTile(
             title: widget.title,
+            subtitle: subtitle,
             icon: widget.icon,
             visibleIfKey: widget.visibleIfKey,
             visibleByDefault: widget.visibleByDefault,
